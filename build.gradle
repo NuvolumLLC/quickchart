@@ -1,0 +1,95 @@
+
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath "jp.classmethod.aws:gradle-aws-plugin:0.30"
+  }
+}
+
+apply plugin: 'jp.classmethod.aws'
+
+aws {
+  profileName = 'nuvo-quickchart'
+  region = 'us-east-1'
+}
+
+task buildZip(type: Zip) {
+
+    delete "target"
+	def target = new File('target')
+    target.mkdirs()
+    
+    copy {
+        from "lib"
+        into "target/lib"
+    }
+    copy {
+        from "public"
+        into "target/public"
+    }
+    copy {
+        from "scripts"
+        into "target/scripts"
+    }
+    copy {
+        from "nginx"
+        into "target/nginx"
+    }
+    copy {
+        from "templates"
+        into "target/templates"
+    }
+    copy {
+        from "Dockerrun.aws.json"
+        into "target"
+    }
+    copy {
+        from "package.json"
+        into "target"
+    }
+    copy {
+        from "yarn.lock"
+        into "target"
+    } 
+    copy {
+        from "api_keys.js"
+        into "target"
+    } 
+    copy {
+        from "index.js"
+        into "target"
+    } 
+    copy {
+        from "logging.js"
+        into "target"
+    } 
+    copy {
+        from "telemetry.js"
+        into "target"
+    } 
+    copy {
+        from ".selintrc.js"
+        into "target"
+    }     
+    copy {
+        from "./.ebextensions"
+        into "target/.ebextensions"
+    } 
+    def contents = new File( 'Dockerfile' ).getText( 'UTF-8' )
+    new File( 'target/Dockerfile' ).write( contents, 'UTF-8' )
+
+    contents = new File( 'LICENSE' ).getText( 'UTF-8' )
+    new File( 'target/LICENSE' ).write( contents, 'UTF-8' )
+
+    delete "dist"
+	def dist = new File('dist')
+    dist.mkdirs()
+   	from ('target/'){
+        include '**/*'
+    }
+    archiveName =  "nuvo-quickchart_" + new Date().format('yyyyMMddHHmmssSSS') + ".zip"
+    destinationDir file('dist')
+}

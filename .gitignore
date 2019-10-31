@@ -128,3 +128,20 @@ build/Release
 # https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
 node_modules
 
+node_modules
+.tmp
+.sass-cache
+.idea
+client/bower_components
+dist
+target
+npm-debug.log
+# ignore mac files
+.DS_Store
+# ignore eclipse files
+.project
+.jsdtscope
+.jshintrc
+### Gradle ###
+.gradle
+/build/
