@@ -16,6 +16,7 @@ RUN apk del .build-deps
 COPY *.js ./
 COPY lib/*.js lib/
 COPY templates templates/
+COPY environment environment/
 COPY LICENSE .
 ENV PORT=80
 EXPOSE 80
