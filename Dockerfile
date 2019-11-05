@@ -1,7 +1,6 @@
 FROM node:10-alpine
 
 ENV NODE_ENV production
-
 WORKDIR /quickchart
 
 RUN apk add --no-cache --virtual .build-deps git yarn build-base g++ python
@@ -18,7 +17,7 @@ COPY *.js ./
 COPY lib/*.js lib/
 COPY templates templates/
 COPY LICENSE .
-
-EXPOSE 3400
+ENV PORT=80
+EXPOSE 80
 
 ENTRYPOINT [ "yarn", "start" ]

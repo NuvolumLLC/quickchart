@@ -2,7 +2,7 @@
     "AWSEBDockerrunVersion": "1",
     "Ports": [
       {
-        "ContainerPort": "3400"
+        "ContainerPort": "80"
       }
     ],
     "Logging": "/var/log/nuvo"

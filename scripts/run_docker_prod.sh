@@ -2,4 +2,4 @@
 
 docker stop quickchart || true
 docker rm quickchart || true
-docker run --name 'quickchart' -d --restart always -p 3400:3400 ianw/quickchart
+docker run --name 'quickchart' -d --restart always -p 3000:80 ianw/quickchart

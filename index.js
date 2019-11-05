@@ -18,6 +18,8 @@ const app = express();
 
 const isDev = app.get('env') === 'development' || app.get('env') === 'test';
 
+var Util = require('./util.js');
+
 app.set('query parser', str =>
   qs.parse(str, {
     decode(s) {
@@ -191,6 +193,7 @@ function doRender(req, res, opts) {
 
   const backgroundColor = opts.backgroundColor || 'transparent';
 
+  //end hack ji
   renderChart(width, height, backgroundColor, devicePixelRatio, untrustedInput)
     .then(opts.onRenderHandler)
     .catch(err => {
@@ -210,7 +213,20 @@ app.get('/chart', (req, res) => {
   };
 
   const outputFormat = (req.query.f || req.query.format || '').toLowerCase();
-
+  var uri = '/chart';
+  var method = 'GET';
+  var apiKey = req.query.apiKey;
+  var signature = req.query.sig;
+  var nonce = req.query.nonce;
+  var timestamp = req.query.timestamp;
+  if( Util.validExternalApiSignature(uri,method,apiKey,nonce,signature,timestamp) === false ){
+    failPng(res, 'Digital Signature Not Valid');
+    return;
+  }
+  // delete req.query.apiKey;
+  // delete req.query.sig;
+  // delete req.query.nonce;
+  // delete req.query.timestamp;
   if (outputFormat === 'pdf') {
     doRenderPdf(req, res, opts);
   } else {
@@ -230,7 +246,22 @@ app.post('/chart', (req, res) => {
     encoding: req.body.encoding || 'url',
   };
   const outputFormat = (req.body.f || req.body.format || '').toLowerCase();
+  var uri = '/chart';
+  var method = 'POST';
+  var apiKey = req.body.apiKey;
+  var signature = req.body.sig;
+  var nonce = req.body.nonce;
+  var timestamp = req.body.timestamp;
 
+  
+  if( Util.validExternalApiSignature(uri,method,apiKey,nonce,signature,timestamp) === false ){
+    failPng(res, 'Digital Signature Not Valid');
+    return;
+  }
+  delete req.body.apiKey;
+  delete req.body.sig;
+  delete req.body.nonce;
+  delete req.body.timestamp;
   if (outputFormat === 'pdf') {
     doRenderPdf(req, res, opts);
   } else {
@@ -318,7 +349,7 @@ app.get('/healthcheck/chart', (req, res) => {
   res.redirect(`/chart?c=${template}`);
 });
 
-const port = process.env.PORT || 3400;
+const port = process.env.PORT || 80;
 const server = app.listen(port);
 
 const timeout = process.env.REQUEST_TIMEOUT_MS || 1000;

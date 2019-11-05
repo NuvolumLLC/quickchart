@@ -145,3 +145,5 @@ npm-debug.log
 ### Gradle ###
 .gradle
 /build/
+
+org.eclipse.*
