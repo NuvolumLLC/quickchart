@@ -73,7 +73,15 @@ task buildZip(type: Zip) {
     copy {
         from ".selintrc.js"
         into "target"
-    }     
+    } 
+    copy {
+        from "util.js"
+        into "target"
+    }
+    copy {
+        from "environment"
+        into "target/environment"
+    }         
     copy {
         from "./.ebextensions"
         into "target/.ebextensions"
