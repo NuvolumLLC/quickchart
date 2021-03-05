@@ -1,24 +1,13 @@
-FROM node:12-alpine
+FROM node:12
 
 ENV NODE_ENV production
-WORKDIR /quickchart
+COPY . /src
+RUN cd /src &&  npm install
 
-RUN apk add --no-cache --virtual .build-deps git yarn build-base g++ python
-RUN apk add --no-cache --virtual .npm-deps cairo-dev pango-dev libjpeg-turbo-dev
-RUN apk add --no-cache --virtual .fonts libmount ttf-dejavu ttf-droid ttf-freefont ttf-liberation ttf-ubuntu-font-family font-noto fontconfig
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-COPY package*.json .
-COPY yarn.lock .
-RUN yarn install --production
-
-RUN apk del .build-deps
-
-COPY *.js ./
-COPY lib/*.js lib/
-COPY templates templates/
-COPY environment environment/
-COPY LICENSE .
 ENV PORT=80
 EXPOSE 80
 
-ENTRYPOINT [ "yarn", "start" ]
+RUN ["chmod", "+x", "/src/start.sh"]
+CMD ["/src/start.sh"]

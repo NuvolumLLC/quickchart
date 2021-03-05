@@ -27,3 +27,15 @@ exports.validExternalApiSignature = function(uri,method,apiKey,nonce,signature,t
     }
     
 }
+
+var readInt = function(item,defaultVal){
+    if( item == undefined || item.trim().length == 0 ){
+        return defaultVal
+    }
+    var theInt = parseInt(item);
+    if( isNaN(theInt) ){
+        return defaultVal;
+    }
+    return theInt;
+}
+exports.readInt = readInt;

@@ -12,6 +12,7 @@ const telemetry = require('./telemetry');
 const { getPdfBufferFromPng, getPdfBufferWithText } = require('./lib/pdf');
 const { logger } = require('./logging');
 const { renderChart } = require('./lib/charts');
+const { renderChartWithCallback } = require('./lib/charts');
 const { renderQr, DEFAULT_QR_SIZE } = require('./lib/qr');
 
 const app = express();
@@ -194,12 +195,19 @@ function doRender(req, res, opts) {
   const backgroundColor = opts.backgroundColor || 'transparent';
 
   //end hack ji
-  renderChart(width, height, backgroundColor, devicePixelRatio, untrustedInput)
-    .then(opts.onRenderHandler)
-    .catch(err => {
-      logger.error('Chart error', err);
-      opts.failFn(res, err);
-    });
+  renderChartWithCallback(width, height, backgroundColor, devicePixelRatio, untrustedInput,function(e,b){
+    if( e ){
+      opts.failFn(res, e);
+    }else{
+      opts.onRenderHandler(b);
+    }
+  });
+  // renderChart(width, height, backgroundColor, devicePixelRatio, untrustedInput)
+  //   .then(opts.onRenderHandler)
+  //   .catch(err => {
+  //     logger.error('Chart error', err);
+  //     opts.failFn(res, err);
+  //   });
 }
 
 app.get('/chart', (req, res) => {
@@ -242,7 +250,7 @@ app.post('/chart', (req, res) => {
     height: req.body.h || req.body.height,
     width: req.body.w || req.body.width,
     backgroundColor: req.body.backgroundColor || req.body.bkg,
-    devicePixelRatio: req.body.devicePixelRatio,
+    devicePixelRatio: Util.readInt(req.body.devicePixelRatio,1) ,
     encoding: req.body.encoding || 'url',
   };
   const outputFormat = (req.body.f || req.body.format || '').toLowerCase();
@@ -270,7 +278,32 @@ app.post('/chart', (req, res) => {
 
   telemetry.count('chartCount');
 });
+app.post('/hack', (req, res) => {
+  const opts = {
+    chart: req.body.c || req.body.chart,
+    height: req.body.h || req.body.height,
+    width: req.body.w || req.body.width,
+    backgroundColor: req.body.backgroundColor || req.body.bkg,
+    // devicePixelRatio: req.body.devicePixelRatio,
+    devicePixelRatio: 1,
+    encoding: req.body.encoding || 'url',
+  };
+  const outputFormat = (req.body.f || req.body.format || '').toLowerCase();
 
+
+ 
+  delete req.body.apiKey;
+  delete req.body.sig;
+  delete req.body.nonce;
+  delete req.body.timestamp;
+  if (outputFormat === 'pdf') {
+    doRenderPdf(req, res, opts);
+  } else {
+    doRenderChart(req, res, opts);
+  }
+
+  telemetry.count('chartCount');
+});
 app.get('/qr', (req, res) => {
   if (!req.query.text) {
     failPng(res, 'You are missing variable `text`');
